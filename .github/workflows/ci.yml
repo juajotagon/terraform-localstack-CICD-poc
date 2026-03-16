@@ -42,6 +42,7 @@ jobs:
         uses: hashicorp/setup-terraform@v4
 
       - name: Levantar los contenedores.
+        working-directory: ./
         run: docker compose up -d --build
 
       - name: Terraform init
@@ -53,6 +54,7 @@ jobs:
         run: terraform apply -auto-approve        
 
       - name: API Test
+        working-directory: ./
         run: |
           docker compose ps
           sleep 10
@@ -63,6 +65,7 @@ jobs:
         run: terraform destroy -auto-approve    
 
       - name: Eliminar los contenedores
+        working-directory: ./
         if: always()
         run: |
           docker compose down -v
