@@ -13,10 +13,10 @@ resource "aws_sqs_queue_policy" "queue_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = "*"
-        Action = "sqs:SendMessage"
-        Resource = aws_sqs_queue.local_queue.arn
+        Action    = "sqs:SendMessage"
+        Resource  = aws_sqs_queue.local_queue.arn
         Condition = {
           ArnEquals = {
             "aws:SourceArn" = aws_s3_bucket.local_bucket.arn
@@ -31,9 +31,9 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = aws_s3_bucket.local_bucket.id
 
   queue {
-    queue_arn     = aws_sqs_queue.local_queue.arn
-    events        = ["s3:ObjectCreated:*"]
+    queue_arn = aws_sqs_queue.local_queue.arn
+    events    = ["s3:ObjectCreated:*"]
   }
-  
+
   depends_on = [aws_sqs_queue_policy.queue_policy]
 }
