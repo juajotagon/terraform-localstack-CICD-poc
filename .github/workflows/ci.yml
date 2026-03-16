@@ -59,8 +59,31 @@ jobs:
         run: |
           docker compose ps
           sleep 10
+          
+          export AWS_ACCESS_KEY_ID=test
+          export AWS_SECRET_ACCESS_KEY=test
+          export AWS_DEFAULT_REGION=us-east-1
+
           curl -f http://localhost:8000/objects
 
+          aws --endpoint-url=http://localhost:4566 sqs list-queues
+
+          curl -X POST http://localhost:8000/objects \
+          -H "Content-Type: application/json" \
+          -d '{"accion": "test", "cola": "numero1"}'
+
+          curl -X POST http://localhost:8000/objects \
+          -H "Content-Type: application/json" \
+          -d '{"accion": "test", "cola": "numero2"}'
+
+          aws --endpoint-url=http://localhost:4566 sqs receive-message --queue-url http://localhost:4566/000000000000/queue-local
+
+          curl -f http://localhost:8000/objects
+
+          aws --endpoint-url=http://localhost:4566 sqs purge-queue --queue-url http://localhost:4566/000000000000/queue-local
+
+          aws --endpoint-url=http://localhost:4566 s3 rm s3://$bucket-local --recursive
+          
       - name: Terraform destroy
         working-directory: ./terraform 
         run: terraform destroy -auto-approve    
