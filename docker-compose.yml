@@ -14,7 +14,12 @@ services:
       #Crea un volumen en la misma carpeta del proyecto.
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       #Borro el docker.sock, ya que en principio no va a necesitar crear instancias con Docker.
-  
+    healthcheck:
+      test: ["CMD", "curl", "-s", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      
   python-app:
     #Buildeamos la API de python.
     build: ./app

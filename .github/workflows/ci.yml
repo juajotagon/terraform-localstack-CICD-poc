@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  localstack-terraform-check:
+  terraform-check:
     runs-on: ubuntu-latest
     steps:
       - name: Hacer un checkout
@@ -33,3 +33,38 @@ jobs:
       - name: Terraform plan
         working-directory: ./terraform
         run: terraform plan
+        
+  localstack-api-docker-compose:
+    runs-on: ubuntu-latest
+    needs: terraform-check
+    steps:
+      - name: Setup de Terraform
+        uses: hashicorp/setup-terraform@v4
+
+      - name: Levantar los contenedores.
+        run: docker-compose up -d --build
+
+      - name: Terraform init
+        working-directory: ./terraform 
+        run: terraform init
+
+      - name: Terraform apply
+        working-directory: ./terraform 
+        run: terraform apply -auto-approve        
+
+      - name: API Test
+        run: |
+          docker compose ps
+          sleep 10
+          curl -f http://localhost:8000/objects
+
+      - name: Terraform destroy
+        working-directory: ./terraform 
+        run: terraform destroy -auto-approve    
+
+      - name: Eliminar los contenedores
+        if: always()
+        run: |
+          docker-compose down -v
+
+      
