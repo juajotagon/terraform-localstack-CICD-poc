@@ -1,0 +1,27 @@
+services:
+  #Estoy usando la configuración predeterminada de localstack. 
+  #https://docs.localstack.cloud/aws/getting-started/installation/#starting-localstack-with-docker-compose
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME:-localstack-main}"
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"            # LocalStack Gateway
+      - "127.0.0.1:4510-4559:4510-4559"  # external services port range
+    environment:
+      # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+      - DEBUG=${DEBUG:-0}
+    volumes:
+      #Crea un volumen en la misma carpeta del proyecto.
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      #Borro el docker.sock, ya que en principio no va a necesitar crear instancias con Docker.
+  
+  python-app:
+    #Buildeamos la API de python.
+    build: ./app
+    ports: 
+      #Abrimos la aplicacion en el puerto 8000.
+      - "0.0.0.0:8000:8000"
+    #Le damos dependencia de que localstack esté OK. https://docs.docker.com/compose/how-tos/startup-order/
+    depends_on:
+      localstack:
+        condition: service_healthy

@@ -1,0 +1,6 @@
+app/.venv
+app/__pycache__
+volume/
+terraform/.terraform*
+terraform/*.tfstate
+terraform/*.tfstate.*
